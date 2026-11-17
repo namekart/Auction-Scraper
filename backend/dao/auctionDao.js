@@ -94,14 +94,15 @@ const getAuctions = async (page, limit, sortBy, sortOrder, search, closeDateStar
   }
 
   const countQuery = `SELECT COUNT(*) as total ${baseQuery}`;
-  const dataQuery = `SELECT * ${baseQuery} ORDER BY ${sortBy} ${sortOrder} LIMIT ? OFFSET ?`;
-  params.push(parseInt(limit), (page - 1) * limit);
+  const direction = String(sortOrder).toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+  const dataQuery = `SELECT * ${baseQuery} ORDER BY ?? ${direction} LIMIT ? OFFSET ?`;
+  const dataParams = [...params, sortBy, parseInt(limit), (page - 1) * limit];
 
   try {
-    const [countResult] = await db.query(countQuery, params.slice(0, -2));
+    const [countResult] = await db.query(countQuery, params);
     const totalItems = countResult[0]?.total || 0;
 
-    const [results] = await db.query(dataQuery, params);
+    const [results] = await db.query(dataQuery, dataParams);
 
     return {
       auctions: results,
