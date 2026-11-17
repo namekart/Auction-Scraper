@@ -10,7 +10,19 @@ const getAuctionBidders = async (page, limit, sortBy, sortOrder, search) => {
   }
 
   const countQuery = `SELECT COUNT(*) as total ${baseQuery}`;
-  const dataQuery = `SELECT * ${baseQuery} ORDER BY ${sortBy} ${sortOrder} LIMIT ? OFFSET ?`;
+  const sortColumns = {
+    id: 'id',
+    bidder_name: 'bidder_name',
+    notes: 'notes',
+    note_updatedby: 'note_updatedby',
+    updated_at: 'updated_at'
+  };
+  if (!Object.prototype.hasOwnProperty.call(sortColumns, sortBy)) {
+    throw new Error('Invalid input');
+  }
+  const orderColumn = sortColumns[sortBy];
+  const orderDirection = String(sortOrder).toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+  const dataQuery = `SELECT * ${baseQuery} ORDER BY ${orderColumn} ${orderDirection} LIMIT ? OFFSET ?`;
   params.push(parseInt(limit), (page - 1) * limit);
 
   try {
